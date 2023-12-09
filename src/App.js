@@ -1,5 +1,5 @@
 import './App.css';
-import React, {useState, useRef} from "react";
+import React, {useState, useRef, useEffect} from "react";
 import axios from "axios";
 import People from "./assets/people.svg";
 import Arrow from "./assets/arrow.svg";
@@ -25,15 +25,29 @@ function App() {
 
     async function addNewUser(){
 
-      const data = await axios.post("http://localhost:3001/users", {
+      const { data: newUser } = await axios.post("http://localhost:3001/users", {
         name:inputName.current.value, 
         age:inputAge.current.value,
       });
 
-      setUsers(data.data);
+      setUsers([...users, newUser]);
       }
 
-    function deleteUser(userId){
+    
+    useEffect(()=>{
+      async function fetUsers(){
+        const {data: newUsers} = await axios.get("http://localhost:3001/users");
+
+        setUsers(newUsers);
+      }
+
+      fetUsers()
+
+    }, [])
+
+    async function deleteUser(userId){
+      await axios.delete(`http://localhost:3001/users/${userId}`)
+      
       const newUser = users.filter((user) => user.id !== userId);
 
       setUsers(newUser)
